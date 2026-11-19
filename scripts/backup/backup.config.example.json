@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "ProjectRef": "YOUR_PROJECT_REF",
+  "Host": "YOUR_SESSION_POOLER_HOST",
+  "Port": 5432,
+  "Database": "postgres",
+  "Username": "postgres.YOUR_PROJECT_REF",
+  "PostgresMajor": 17,
+  "Schemas": [
+    "public",
+    "auth",
+    "storage",
+    "supabase_migrations"
+  ],
+  "RetentionDays": 30,
+  "MonthlyRetentionMonths": 12,
+  "OneDriveSubdirectory": "Portfolio Database Backups/Database",
+  "TaskName": "OPTOCOM-Portfolio-Backup-Diario"
+}

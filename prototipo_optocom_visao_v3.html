@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OPTOCOM Visão — Protótipo V3</title>
+<style>
+:root{
+  --bg:#f4f7f7; --panel:#fff; --text:#1f2b2c; --muted:#6e7d7e; --line:#e1e8e8;
+  --teal:#00939a; --teal-dark:#007a80; --teal-soft:#e8f7f7;
+  --green:#2d8a59; --red:#c54f4f; --amber:#c9852f; --nav:#143034; --nav2:#1d464b;
+  --shadow:0 8px 24px rgba(18,46,49,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}
+.sidebar{width:252px;background:var(--nav);color:white;position:fixed;inset:0 auto 0 0;padding:20px 15px;overflow:auto}
+.brand{display:flex;align-items:center;gap:12px;padding:3px 6px 17px;border-bottom:1px solid rgba(255,255,255,.11)}
+.eye{width:43px;height:43px;border:2px solid #68d3d7;border-radius:11px;display:grid;place-items:center;color:#68d3d7;font-weight:900;font-size:17px}
+.brand .name{font-size:16px;font-weight:800;line-height:1}.brand .sub{font-size:11px;color:#a8c7ca;margin-top:4px}
+.group{font-size:10px;color:#7fa4a8;text-transform:uppercase;letter-spacing:.09em;margin:16px 9px 6px}
+.nav button{width:100%;border:0;background:transparent;color:#d8e4e5;border-radius:8px;padding:10px 11px;margin:2px 0;text-align:left;font-size:13px;cursor:pointer}
+.nav button:hover,.nav button.active{background:var(--nav2);color:white}
+.ico{display:inline-block;width:25px;color:#78ced1}
+.main{margin-left:252px;width:calc(100% - 252px)}
+.topbar{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:5}
+.topbar h1{font-size:17px;margin:0}.user{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}.avatar{width:34px;height:34px;border-radius:50%;background:var(--teal-soft);display:grid;place-items:center;color:var(--teal-dark);font-weight:800}
+.content{padding:26px 28px 38px;max-width:1510px;margin:auto}
+.screen{display:none}.screen.active{display:block}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}.toolbar h2{font-size:23px;margin:0 0 3px}.toolbar p{font-size:12px;color:var(--muted);margin:0}
+.btn{border:1px solid var(--line);background:#fff;color:#455356;padding:9px 12px;border-radius:8px;cursor:pointer}
+.btn-primary{border:0;background:var(--teal);color:white;padding:10px 14px;border-radius:8px;font-weight:750;cursor:pointer}
+.periods{display:flex;gap:5px;flex-wrap:wrap}.periods button{border:1px solid var(--line);background:#fff;color:#536264;padding:8px 11px;border-radius:7px;cursor:pointer}.periods button.active{background:var(--teal);border-color:var(--teal);color:white}
+.cards{display:grid;grid-template-columns:repeat(6,minmax(125px,1fr));gap:11px;margin-bottom:17px}
+.card,.panel{background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow)}
+.card{padding:15px}.label{font-size:11px;color:var(--muted);margin-bottom:8px}.value{font-size:22px;font-weight:820;letter-spacing:-.4px}.subvalue{font-size:10px;color:var(--muted);margin-top:5px}
+.green{color:var(--green)}.red{color:var(--red)}.teal{color:var(--teal-dark)}.amber{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1.45fr 1fr;gap:15px;margin-bottom:15px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.panel{padding:17px}.panel h3{font-size:14px;margin:0 0 13px}
+table{width:100%;border-collapse:collapse}th{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);font-size:10px;color:#758284}td{padding:10px 9px;border-bottom:1px solid #f0f3f3;font-size:11.5px}
+.badge{font-size:9.5px;padding:4px 7px;border-radius:999px;font-weight:750}.paid{background:#e7f5ed;color:#2a734a}.pending{background:#fff3df;color:#97621c}.confirmed{background:#e8f7f7;color:#146d72}.missed{background:#fbe7e7;color:#a84343}.done{background:#e7f5ed;color:#2a734a}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.field label{display:block;font-size:10.5px;color:#6f7d7f;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid #dce5e6;border-radius:8px;padding:10px 11px;font-size:12px;background:#fff;color:#263435}.full{grid-column:1/-1}
+.formlayout{display:grid;grid-template-columns:1.45fr .73fr;gap:16px}.summary{position:sticky;top:92px}.sep{height:1px;background:var(--line);margin:16px 0}.section{font-size:12px;font-weight:800;margin-bottom:10px}.sumline{display:flex;justify-content:space-between;font-size:12px;padding:8px 0;border-bottom:1px solid var(--line)}.sumtotal{display:flex;justify-content:space-between;font-size:18px;font-weight:850;padding:14px 0 4px}
+.notice{padding:11px 13px;border-radius:8px;background:#eef9f9;border:1px solid #d8eeee;color:#38686b;font-size:11px;margin-bottom:13px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:15px}.q{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px}.q span{font-size:10px;color:var(--muted)}.q b{display:block;font-size:17px;margin-top:4px}
+.agenda{display:grid;grid-template-columns:90px 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}.time{padding:14px 12px;background:#fafcfc;border-bottom:1px solid var(--line);font-size:11px;color:#6b797b}.slot{padding:11px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.slot strong{font-size:12px}.slot small{color:var(--muted);font-size:10px}.slot-actions{display:flex;gap:6px}
+.tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px 10px;font-size:11px;cursor:pointer}.tabs button.active{background:#27494d;color:white;border-color:#27494d}
+.chart{height:200px;border:1px solid #edf1f2;border-radius:8px;background:linear-gradient(#fbfefe,#f3f8f8);position:relative;overflow:hidden}.axis{position:absolute;left:28px;right:16px;bottom:27px;border-top:1px solid #dce5e7}.bars{position:absolute;left:40px;right:23px;top:22px;bottom:28px;display:flex;gap:12px;align-items:flex-end}.bar{flex:1;background:#8ed5d8;border-radius:5px 5px 0 0;position:relative}.bar small{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:9px;color:#7c898b}
+.checkrow{display:grid;grid-template-columns:1fr 120px 120px;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:11px}
+.toast{position:fixed;right:22px;bottom:22px;background:#18383c;color:white;padding:12px 15px;border-radius:9px;display:none;box-shadow:0 12px 30px rgba(0,0,0,.18);font-size:12px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.grid2,.formlayout{grid-template-columns:1fr}.summary{position:static}.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.sidebar{display:none}.main{margin-left:0;width:100%}.content{padding:18px}.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.grid3,.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fff3cc;color:#443300;padding:10px;text-align:center;font:14px sans-serif">PORTFÓLIO — Todos os nomes, telefones, fornecedores, quantias e indicadores deste protótipo são sintéticos.</div>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="eye">◉</div><div><div class="name">OPTOCOM Visão</div><div class="sub">Gestão da Clínica • V3</div></div></div>
+  <div class="nav">
+    <div class="group">Principal</div>
+    <button class="active" data-screen="dashboard"><span class="ico">⌂</span>Dashboard</button>
+    <button data-screen="agenda"><span class="ico">▦</span>Agenda</button>
+    <button data-screen="novo"><span class="ico">＋</span>Novo Atendimento</button>
+    <button data-screen="pacientes"><span class="ico">👤</span>Pacientes</button>
+    <button data-screen="atendimentos"><span class="ico">▤</span>Atendimentos</button>
+    <div class="group">Financeiro</div>
+    <button data-screen="entradas"><span class="ico">↗</span>Entradas</button>
+    <button data-screen="saidas"><span class="ico">↘</span>Saídas</button>
+    <button data-screen="pagar"><span class="ico">◷</span>Contas a Pagar</button>
+    <button data-screen="receber"><span class="ico">◎</span>Contas a Receber</button>
+    <button data-screen="fechamento"><span class="ico">✓</span>Fechamento Diário</button>
+    <button data-screen="mov"><span class="ico">⇄</span>Movimentações</button>
+    <button data-screen="emprestimos"><span class="ico">▣</span>Empréstimos</button>
+    <button data-screen="fornecedores"><span class="ico">◆</span>Fornecedores</button>
+    <div class="group">Gestão</div>
+    <button data-screen="relatorios"><span class="ico">▥</span>Relatórios</button>
+    <button data-screen="config"><span class="ico">⚙</span>Configurações</button>
+  </div>
+</aside>
+
+<main class="main">
+<div class="topbar"><h1 id="title">Dashboard</h1><div class="user"><span>Administrador</span><div class="avatar">A</div></div></div>
+<div class="content">
+
+<section class="screen active" id="dashboard">
+  <div class="toolbar"><div><h2>OPTOCOM Visão</h2><p>Demonstração • 1 de janeiro de 2030</p></div><div class="periods"><button class="active">Hoje</button><button>Semana</button><button>Mês</button><button>Ano</button></div></div>
+  <div class="cards">
+    <div class="card"><div class="label">Agendados hoje</div><div class="value">8</div><div class="subvalue">5 já atendidos</div></div>
+    <div class="card"><div class="label">Consultas</div><div class="value teal">R$ 450,00</div><div class="subvalue">5 atendimentos</div></div>
+    <div class="card"><div class="label">Exames</div><div class="value teal">R$ 140,00</div><div class="subvalue">3 exames</div></div>
+    <div class="card"><div class="label">Receita</div><div class="value green">R$ 590,00</div><div class="subvalue">bruta do dia</div></div>
+    <div class="card"><div class="label">Despesas</div><div class="value red">R$ 95,00</div><div class="subvalue">pagas hoje</div></div>
+    <div class="card"><div class="label">Resultado</div><div class="value green">R$ 495,00</div><div class="subvalue">operacional</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Próximos pacientes</h3>
+      <table><thead><tr><th>Hora</th><th>Paciente</th><th>Serviço</th><th>Status</th></tr></thead>
+      <tbody><tr><td>15:00</td><td>Ana Exemplo</td><td>Avaliação Visual</td><td><span class="badge confirmed">Confirmado</span></td></tr>
+      <tr><td>16:00</td><td>Carlos Exemplo</td><td>Lentes de Contato</td><td><span class="badge confirmed">Confirmado</span></td></tr>
+      <tr><td>17:00</td><td>Beatriz Exemplo</td><td>Retorno</td><td><span class="badge pending">Aguardando</span></td></tr></tbody></table>
+    </div>
+    <div class="panel"><h3>Financeiro do dia</h3>
+      <table><tbody><tr><td>Pix</td><td><b>R$ 250,00</b></td></tr><tr><td>Dinheiro</td><td><b>R$ 90,00</b></td></tr><tr><td>Débito</td><td><b>R$ 100,00</b></td></tr><tr><td>Crédito</td><td><b>R$ 150,00</b></td></tr><tr><td>Taxas estimadas</td><td class="red"><b>R$ 8,70</b></td></tr></tbody></table>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="panel"><h3>A receber</h3><div class="value teal">R$ 1.230,00</div><p style="font-size:11px;color:var(--muted)">cartões + pendências</p></div>
+    <div class="panel"><h3>Contas a pagar — 7 dias</h3><div class="value red">R$ 3.190,00</div><p style="font-size:11px;color:var(--muted)">inclui aluguel e fornecedores</p></div>
+    <div class="panel"><h3>Próximo atendimento</h3><div class="value" style="font-size:18px">15:00</div><p style="font-size:11px;color:var(--muted)">Ana Exemplo • Avaliação Visual</p></div>
+  </div>
+</section>
+
+<section class="screen" id="agenda">
+  <div class="toolbar"><div><h2>Agenda</h2><p>Horários do dia e status dos pacientes.</p></div><button class="btn-primary">+ Novo agendamento</button></div>
+  <div class="notice">Fluxo simples: <b>Agendado → Confirmado → Atendido</b>. Também é possível marcar como Cancelado ou Faltou.</div>
+  <div class="panel">
+    <div class="agenda">
+      <div class="time">09:00</div><div class="slot"><div><strong>Daniela Exemplo</strong><br><small>Avaliação Visual • Profissional Exemplo A</small></div><span class="badge done">Atendido</span></div>
+      <div class="time">10:00</div><div class="slot"><div><strong>Eduardo Exemplo</strong><br><small>Lentes de Contato • Profissional Exemplo A</small></div><span class="badge done">Atendido</span></div>
+      <div class="time">11:00</div><div class="slot"><div><strong>Fernanda Exemplo</strong><br><small>Avaliação Visual • Profissional Exemplo B</small></div><span class="badge missed">Faltou</span></div>
+      <div class="time">14:00</div><div class="slot"><div><strong>Gabriel Exemplo</strong><br><small>Retorno • Profissional Exemplo A</small></div><span class="badge done">Atendido</span></div>
+      <div class="time">15:00</div><div class="slot"><div><strong>Ana Exemplo</strong><br><small>Avaliação Visual • Profissional Exemplo A</small></div><div class="slot-actions"><span class="badge confirmed">Confirmado</span><button class="btn" onclick="switchScreen('novo')">Iniciar</button></div></div>
+      <div class="time">16:00</div><div class="slot"><div><strong>Carlos Exemplo</strong><br><small>Lentes de Contato • Profissional Exemplo B</small></div><span class="badge confirmed">Confirmado</span></div>
+      <div class="time">17:00</div><div class="slot"><div><strong>Beatriz Exemplo</strong><br><small>Retorno • Profissional Exemplo A</small></div><span class="badge pending">Aguardando</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="novo">
+  <div class="toolbar"><div><h2>Novo Atendimento</h2><p>Consulta, exames, desconto e pagamento em uma única tela.</p></div></div>
+  <div class="formlayout">
+    <div class="panel">
+      <div class="section">Paciente e profissional</div>
+      <div class="formgrid">
+        <div class="field full"><label>Paciente</label><input value="Ana Exemplo"></div>
+        <div class="field"><label>Profissional responsável</label><select><option>Profissional Exemplo A</option><option>Profissional Exemplo B</option></select></div>
+        <div class="field"><label>Data / horário</label><input value="01/01/2030 • 15:00"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="section">Consulta</div>
+      <div class="formgrid">
+        <div class="field"><label>Tipo</label><select><option>Avaliação Visual</option><option>Lentes de Contato</option><option>Terapia Visual</option><option>Retorno</option></select></div>
+        <div class="field"><label>Valor padrão</label><input value="90,00"></div>
+        <div class="field"><label>Desconto</label><input value="0,00"></div>
+        <div class="field"><label>Valor final da consulta</label><input value="90,00"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="section">Exames</div>
+      <div class="formgrid"><div class="field"><label>Exame</label><select><option>Topografia</option><option>Outro exame</option></select></div><div class="field"><label>Valor</label><input value="40,00"></div></div>
+      <div style="margin-top:10px"><button class="btn">+ Adicionar exame</button></div>
+      <div class="sep"></div>
+      <div class="section">Pagamento</div>
+      <div class="formgrid">
+        <div class="field"><label>Forma</label><select><option>Pix</option><option>Dinheiro</option><option>Débito</option><option>Crédito</option></select></div>
+        <div class="field"><label>Valor</label><input value="130,00"></div>
+        <div class="field"><label>Status</label><select><option>Pago</option><option>Parcial</option><option>Pendente</option></select></div>
+        <div class="field"><label>Observação administrativa</label><input placeholder="Opcional"></div>
+      </div>
+      <div style="margin-top:10px"><button class="btn">+ Dividir pagamento</button></div>
+    </div>
+    <div class="panel summary"><h3>Resumo</h3>
+      <div class="sumline"><span>Consulta</span><b>R$ 90,00</b></div>
+      <div class="sumline"><span>Exames</span><b>R$ 40,00</b></div>
+      <div class="sumline"><span>Desconto</span><b>R$ 0,00</b></div>
+      <div class="sumline"><span>Taxa financeira</span><b>R$ 0,00</b></div>
+      <div class="sumtotal"><span>Total</span><span>R$ 130,00</span></div>
+      <p style="font-size:10px;color:var(--muted)">Se for retorno gratuito, o atendimento conta nos indicadores mesmo com valor R$ 0,00</p>
+      <button class="btn-primary" style="width:100%" onclick="toast('Atendimento salvo no protótipo')">Salvar atendimento</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="pacientes">
+  <div class="toolbar"><div><h2>Pacientes</h2><p>Cadastro e histórico administrativo.</p></div><button class="btn-primary">+ Novo paciente</button></div>
+  <div class="panel"><table><thead><tr><th>Paciente</th><th>Telefone</th><th>Último atendimento</th><th>Qtd.</th><th>Total pago</th></tr></thead><tbody>
+  <tr><td>Ana Exemplo</td><td>(51) 99999-0001</td><td>01/01/2030</td><td>4</td><td>R$ 460,00</td></tr>
+  <tr><td>Carlos Exemplo</td><td>(51) 99999-0002</td><td>01/01/2030</td><td>2</td><td>R$ 180,00</td></tr></tbody></table></div>
+</section>
+
+<section class="screen" id="atendimentos">
+  <div class="toolbar"><div><h2>Atendimentos</h2><p>Histórico de consultas, exames, descontos e pagamentos.</p></div></div>
+  <div class="panel"><table><thead><tr><th>Data</th><th>Paciente</th><th>Profissional</th><th>Consulta</th><th>Exames</th><th>Desconto</th><th>Total</th><th>Status</th></tr></thead>
+  <tbody><tr><td>01/01</td><td>Ana Exemplo</td><td>Profissional Exemplo A</td><td>Avaliação Visual</td><td>Topografia</td><td>R$ 0,00</td><td>R$ 130,00</td><td><span class="badge paid">Pago</span></td></tr>
+  <tr><td>01/01</td><td>Gabriel Exemplo</td><td>Profissional Exemplo A</td><td>Retorno</td><td>—</td><td>—</td><td>R$ 0,00</td><td><span class="badge done">Concluído</span></td></tr></tbody></table></div>
+</section>
+
+<section class="screen" id="entradas">
+  <div class="toolbar"><div><h2>Entradas</h2><p>Receitas operacionais e entradas financeiras separadas.</p></div><button class="btn-primary">+ Nova entrada</button></div>
+  <div class="notice">Consultas e exames geram receita automaticamente. Empréstimos e aportes entram no caixa, mas <b>não aumentam o faturamento</b>.</div>
+  <div class="panel"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Forma</th><th>Valor</th></tr></thead><tbody>
+  <tr><td>01/01</td><td>Atendimento</td><td>Ana Exemplo</td><td>Pix</td><td class="green">+ R$ 130,00</td></tr>
+  <tr><td>01/01</td><td>Empréstimo recebido</td><td>Banco Exemplo</td><td>Conta bancária</td><td class="green">+ R$ 5.000,00</td></tr></tbody></table></div>
+</section>
+
+<section class="screen" id="saidas">
+  <div class="toolbar"><div><h2>Saídas</h2><p>Despesas, fornecedores, empréstimos e retiradas.</p></div><button class="btn-primary">+ Nova saída</button></div>
+  <div class="tabs"><button class="active">Todas</button><button>Operacionais</button><button>Fornecedores</button><button>Empréstimos</button><button>Retiradas</button><button>Estornos</button></div>
+  <div class="panel"><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead><tbody>
+  <tr><td>01/01</td><td>Fornecedor</td><td>Materiais clínicos</td><td>Fornecedor Exemplo A Ltda.</td><td>R$ 925,00</td><td><span class="badge paid">Pago</span></td></tr>
+  <tr><td>01/01</td><td>Luz</td><td>Energia elétrica</td><td>—</td><td>R$ 325,00</td><td><span class="badge paid">Pago</span></td></tr>
+  <tr><td>01/01</td><td>Retirada</td><td>Retirada do proprietário</td><td>—</td><td>R$ 1.000,00</td><td><span class="badge pending">Retirada</span></td></tr></tbody></table></div>
+</section>
+
+<section class="screen" id="pagar">
+  <div class="toolbar"><div><h2>Contas a Pagar</h2><p>Previsibilidade dos próximos vencimentos.</p></div><button class="btn-primary">+ Nova conta</button></div>
+  <div class="grid4">
+    <div class="card"><div class="label">Vence hoje</div><div class="value red">R$ 240,00</div></div>
+    <div class="card"><div class="label">Próximos 7 dias</div><div class="value red">R$ 3.190,00</div></div>
+    <div class="card"><div class="label">Próximos 15 dias</div><div class="value red">R$ 4.620,00</div></div>
+    <div class="card"><div class="label">Próximos 30 dias</div><div class="value red">R$ 7.940,00</div></div>
+  </div>
+  <div class="panel" style="margin-top:14px"><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Categoria</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead><tbody>
+    <tr><td>01/01</td><td>Telefone</td><td>Telefone</td><td>Operadora Exemplo</td><td>R$ 90,00</td><td><span class="badge pending">Pendente</span></td></tr>
+    <tr><td>02/01</td><td>Aluguel</td><td>Aluguel</td><td>—</td><td>R$ 2.000,00</td><td><span class="badge pending">Pendente</span></td></tr>
+    <tr><td>02/01</td><td>Fornecedor Exemplo B Ltda.</td><td>Fornecedor</td><td>Fornecedor Exemplo B Ltda.</td><td>R$ 550,00</td><td><span class="badge pending">Pendente</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="screen" id="receber">
+  <div class="toolbar"><div><h2>Contas a Receber</h2><p>Cartões e pagamentos pendentes.</p></div></div>
+  <div class="grid4">
+    <div class="card"><div class="label">Hoje</div><div class="value green">R$ 270,00</div></div>
+    <div class="card"><div class="label">7 dias</div><div class="value green">R$ 1.230,00</div></div>
+    <div class="card"><div class="label">15 dias</div><div class="value green">R$ 2.490,00</div></div>
+    <div class="card"><div class="label">30 dias</div><div class="value green">R$ 4.160,00</div></div>
+  </div>
+  <div class="panel" style="margin-top:14px"><table><thead><tr><th>Previsão</th><th>Origem</th><th>Paciente</th><th>Forma</th><th>Bruto</th><th>Taxa</th><th>Líquido</th></tr></thead><tbody>
+    <tr><td>01/01</td><td>Atendimento</td><td>Carlos Exemplo</td><td>Crédito</td><td>R$ 150,00</td><td>R$ 5,25</td><td>R$ 144,75</td></tr>
+    <tr><td>02/01</td><td>Atendimento</td><td>Beatriz Exemplo</td><td>Crédito</td><td>R$ 120,00</td><td>R$ 4,20</td><td>R$ 115,80</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="screen" id="fechamento">
+  <div class="toolbar"><div><h2>Fechamento Diário</h2><p>Conferência das entradas e do caixa físico.</p></div><button class="btn-primary">Fechar dia</button></div>
+  <div class="notice">O sistema já calcula o valor esperado. Você informa o valor conferido e ele aponta qualquer diferença.</div>
+  <div class="panel">
+    <div class="checkrow"><b>Forma</b><b>Esperado</b><b>Conferido</b></div>
+    <div class="checkrow"><span>Dinheiro</span><span>R$ 90,00</span><input value="90,00"></div>
+    <div class="checkrow"><span>Pix</span><span>R$ 250,00</span><input value="250,00"></div>
+    <div class="checkrow"><span>Débito</span><span>R$ 100,00</span><input value="100,00"></div>
+    <div class="checkrow"><span>Crédito</span><span>R$ 150,00</span><input value="150,00"></div>
+    <div class="sep"></div>
+    <div class="grid3">
+      <div class="card"><div class="label">Total esperado</div><div class="value">R$ 590,00</div></div>
+      <div class="card"><div class="label">Total conferido</div><div class="value green">R$ 590,00</div></div>
+      <div class="card"><div class="label">Diferença</div><div class="value green">R$ 0,00</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="mov">
+  <div class="toolbar"><div><h2>Movimentações</h2><p>Extrato gerencial: entradas, saídas, retiradas e transferências.</p></div></div>
+  <div class="panel"><table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Conta</th><th>Entrada</th><th>Saída</th></tr></thead><tbody>
+    <tr><td>01/01</td><td>Atendimento</td><td>Ana Exemplo</td><td>Pix</td><td class="green">R$ 130,00</td><td>—</td></tr>
+    <tr><td>01/01</td><td>Fornecedor</td><td>Materiais clínicos</td><td>Banco</td><td>—</td><td class="red">R$ 925,00</td></tr>
+    <tr><td>01/01</td><td>Transferência interna</td><td>Caixa → Banco</td><td>Interna</td><td>R$ 0,00</td><td>R$ 0,00</td></tr>
+    <tr><td>01/01</td><td>Retirada</td><td>Retirada do proprietário</td><td>Banco</td><td>—</td><td class="red">R$ 1.000,00</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="screen" id="emprestimos">
+  <div class="toolbar"><div><h2>Empréstimos</h2><p>Valor recebido, juros, parcelas e saldo devedor.</p></div><button class="btn-primary">+ Novo empréstimo</button></div>
+  <div class="panel"><table><thead><tr><th>Instituição</th><th>Original</th><th>Saldo</th><th>Parcela</th><th>Próx. vencimento</th><th>Status</th></tr></thead><tbody>
+    <tr><td>Banco Exemplo</td><td>R$ 10.000,00</td><td>R$ 7.900,00</td><td>R$ 490,00</td><td>02/01</td><td><span class="badge paid">Em dia</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="screen" id="fornecedores">
+  <div class="toolbar"><div><h2>Fornecedores</h2><p>Cadastro, compras e histórico de pagamentos.</p></div><button class="btn-primary">+ Novo fornecedor</button></div>
+  <div class="panel"><table><thead><tr><th>Fornecedor</th><th>Telefone</th><th>Pago no mês</th><th>Pendente</th><th>Último pagamento</th></tr></thead><tbody>
+    <tr><td>Fornecedor Exemplo A Ltda.</td><td>(51) 99999-0003</td><td>R$ 1.725,00</td><td>R$ 0,00</td><td>01/01</td></tr>
+    <tr><td>Fornecedor Exemplo B Ltda.</td><td>(51) 99999-0004</td><td>R$ 1.015,00</td><td>R$ 550,00</td><td>01/01</td></tr>
+  </tbody></table></div>
+</section>
+
+<section class="screen" id="relatorios">
+  <div class="toolbar"><div><h2>Relatórios</h2><p>Financeiro, atendimentos, agenda e profissionais.</p></div><div class="periods"><button>Hoje</button><button>Semana</button><button class="active">Mês</button><button>Ano</button></div></div>
+  <div class="cards">
+    <div class="card"><div class="label">Faturamento</div><div class="value green">R$ 18.860,00</div></div>
+    <div class="card"><div class="label">Consultas</div><div class="value teal">R$ 14.740,00</div></div>
+    <div class="card"><div class="label">Exames</div><div class="value teal">R$ 4.120,00</div></div>
+    <div class="card"><div class="label">Descontos</div><div class="value amber">R$ 310,00</div></div>
+    <div class="card"><div class="label">Despesas</div><div class="value red">R$ 9.470,00</div></div>
+    <div class="card"><div class="label">Resultado</div><div class="value green">R$ 9.390,00</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Agenda e atendimento</h3><table><tbody>
+      <tr><td>Agendamentos</td><td><b>190</b></td></tr><tr><td>Atendidos</td><td><b>174</b></td></tr><tr><td>Cancelamentos</td><td>8</td></tr><tr><td>Faltas</td><td>8</td></tr><tr><td>Taxa de comparecimento</td><td><b>91,6%</b></td></tr>
+    </tbody></table></div>
+    <div class="panel"><h3>Profissionais</h3><table><thead><tr><th>Profissional</th><th>Atendimentos</th><th>Receita</th></tr></thead><tbody>
+      <tr><td>Profissional Exemplo A</td><td>102</td><td>R$ 11.090,00</td></tr><tr><td>Profissional Exemplo B</td><td>72</td><td>R$ 7.770,00</td></tr>
+    </tbody></table></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Receita por serviço</h3><table><thead><tr><th>Serviço</th><th>Qtd.</th><th>Receita</th></tr></thead><tbody>
+      <tr><td>Avaliação Visual</td><td>92</td><td>R$ 8.280,00</td></tr><tr><td>Lentes de Contato</td><td>28</td><td>R$ 2.800,00</td></tr><tr><td>Terapia Visual</td><td>14</td><td>R$ 1.050,00</td></tr><tr><td>Exames</td><td>86</td><td>R$ 4.120,00</td></tr>
+    </tbody></table></div>
+    <div class="panel"><h3>Financeiro</h3><table><tbody>
+      <tr><td>Receita operacional</td><td><b>R$ 18.860,00</b></td></tr><tr><td>Taxas financeiras</td><td>R$ 371,00</td></tr><tr><td>Despesas operacionais</td><td>R$ 9.470,00</td></tr><tr><td>Retiradas</td><td>R$ 2.000,00</td></tr><tr><td><b>Resultado operacional</b></td><td><b class="green">R$ 9.390,00</b></td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<section class="screen" id="config">
+  <div class="toolbar"><div><h2>Configurações</h2><p>Tudo que a OPTOCOM pode editar sem programação.</p></div></div>
+  <div class="grid3">
+    <div class="panel"><h3>Consultas e exames</h3><p style="font-size:11px;color:var(--muted)">Tipos, preços padrão, retornos e status.</p><button class="btn">Gerenciar</button></div>
+    <div class="panel"><h3>Profissionais</h3><p style="font-size:11px;color:var(--muted)">Cadastro e vínculo com atendimentos.</p><button class="btn">Gerenciar</button></div>
+    <div class="panel"><h3>Pagamentos e cartões</h3><p style="font-size:11px;color:var(--muted)">Pix, dinheiro, bandeiras, parcelas, adquirentes e taxas.</p><button class="btn">Gerenciar</button></div>
+    <div class="panel"><h3>Despesas recorrentes</h3><p style="font-size:11px;color:var(--muted)">Aluguel, salários, contador, telefone e outras.</p><button class="btn">Gerenciar</button></div>
+    <div class="panel"><h3>Usuários</h3><p style="font-size:11px;color:var(--muted)">3 administradores com log individual.</p><button class="btn">Gerenciar</button></div>
+    <div class="panel"><h3>Backups</h3><p style="font-size:11px;color:var(--muted)">Backup automático diário às 03:00 + cópia externa.</p><button class="btn" onclick="toast('Backup manual iniciado no protótipo')">Fazer backup agora</button></div>
+    <div class="panel"><h3>Auditoria</h3><p style="font-size:11px;color:var(--muted)">Quem criou, editou ou cancelou cada registro.</p><button class="btn">Ver histórico</button></div>
+    <div class="panel"><h3>Importar dados</h3><p style="font-size:11px;color:var(--muted)">Importação inicial de pacientes e histórico a partir do Excel.</p><button class="btn">Importar Excel</button></div>
+    <div class="panel"><h3>Exportações</h3><p style="font-size:11px;color:var(--muted)">Relatórios em Excel e PDF.</p><button class="btn">Exportar</button></div>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const titles={dashboard:"Dashboard",agenda:"Agenda",novo:"Novo Atendimento",pacientes:"Pacientes",atendimentos:"Atendimentos",entradas:"Entradas",saidas:"Saídas",pagar:"Contas a Pagar",receber:"Contas a Receber",fechamento:"Fechamento Diário",mov:"Movimentações",emprestimos:"Empréstimos",fornecedores:"Fornecedores",relatorios:"Relatórios",config:"Configurações"};
+function switchScreen(id){
+ document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===id));
+ document.getElementById('title').textContent=titles[id];
+ window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>switchScreen(b.dataset.screen));
+document.querySelectorAll('.periods button').forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+</script>
+</body>
+</html>
