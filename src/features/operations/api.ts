@@ -33,9 +33,11 @@ export async function getPatient(id: string) {
   if (error) throw error
   return data
 }
-export type PatientInput = { full_name: string; phone: string; birth_date: string | null; cpf: string | null; admin_notes: string; active: boolean }
-export async function savePatient(input: PatientInput, previous: Patient | null) {
-  const query = previous ? client().from('patients').update(input).eq('id', previous.id).eq('version', previous.version) : client().from('patients').insert(input)
+export type PatientInput = { full_name: string; phone: string | null; birth_date: string | null; cpf: string | null; admin_notes: string; active: boolean }
+export async function savePatient(input: PatientInput, previous: Pick<Patient, 'id' | 'version'> | null) {
+  // Salvar o formulário normal conclui o cadastro, mesmo sem campos opcionais.
+  const payload = { ...input, registration_pending: false }
+  const query = previous ? client().from('patients').update(payload).eq('id', previous.id).eq('version', previous.version) : client().from('patients').insert(payload)
   const { data, error } = await query.select().maybeSingle()
   return requireRow(data, error)
 }
@@ -69,7 +71,7 @@ export async function saveCatalog(table: 'professionals' | 'appointment_types' |
   const query = previous ? client().from(table).update(payload).eq('id', previous.id).eq('version', previous.version) : client().from(table).insert(payload)
   const { data, error } = await query.select().maybeSingle(); return requireRow(data, error, table)
 }
-export const APPOINTMENT_COLUMNS = 'id,version,patient_id,professional_id,appointment_type_id,start_at,status,admin_notes,cancel_reason,patient_name,professional_name,consultation_name,visit_id' as const
+export const APPOINTMENT_COLUMNS = 'id,version,patient_id,professional_id,appointment_type_id,start_at,status,admin_notes,cancel_reason,patient_name,professional_name,consultation_name,visit_id,patient_registration_pending' as const
 export type AppointmentRow = Awaited<ReturnType<typeof appointments>>[number]
 export async function appointments(date: string) {
   const [start, end] = dayRange(date)
@@ -83,6 +85,11 @@ export type AppointmentInput = { patient_id: string; professional_id: string; ap
 export async function saveAppointment(input: AppointmentInput, previous: Pick<Appointment, 'id' | 'version'> | null) {
   const query = previous ? client().from('appointments').update(input).eq('id', previous.id).eq('version', previous.version) : client().from('appointments').insert(input)
   const { data, error } = await query.select().maybeSingle(); return requireRow(data, error)
+}
+export async function scheduleNewPatient(input: Omit<AppointmentInput, 'patient_id' | 'cancel_reason'> & { full_name: string }) {
+  const { data, error } = await client().rpc('schedule_new_patient', { p_data: input })
+  if (error && ['PGRST202', '42883'].includes(error.code)) throw new Error('O cadastro rápido ainda precisa ser habilitado no sistema. Nenhum paciente ou agendamento foi criado.')
+  return requireRow(data as Appointment | null, error)
 }
 export async function startVisit(id: string) {
   const { data, error } = await client().rpc('start_visit', { p_appointment_id: id })

@@ -12,10 +12,13 @@ Agenda, cadastro de pacientes e financeiro eram controles separados. Isso exigia
 
 Construí uma aplicação web que conecta o agendamento ao atendimento e ao financeiro. Os computadores da clínica acessam a mesma aplicação pelo navegador, com login individual e dados compartilhados. As telas foram organizadas para apoiar a rotina de recepção e administração.
 
+O desenvolvimento é incremental: melhorias de usabilidade surgem a partir do uso cotidiano da aplicação pela clínica e são validadas antes da publicação.
+
 ## Funcionalidades
 
 - Cadastro e histórico administrativo de pacientes; profissionais, tipos de consulta e exames.
 - Agenda diária, edição, cancelamento e exclusão protegida de agendamentos sem histórico.
+- Agendamento rápido de novos pacientes apenas pelo nome, permitindo completar o mesmo cadastro posteriormente sem duplicar registros. Veja o [fluxo de cadastro rápido](docs/quick-patient-scheduling.md).
 - Atendimentos com exames, retorno gratuito, descontos e cálculo dos valores.
 - Pagamentos divididos e parciais, taxas de cartão e liquidação automática de parcelas elegíveis.
 - Entradas, saídas, contas a pagar e receber, fornecedores, recorrências e empréstimos.

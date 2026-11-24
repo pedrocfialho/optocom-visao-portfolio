@@ -19,6 +19,7 @@ export async function operationalApi(page: Page,financial=false,usability=false,
   }
   if(automation){await db.exec('create schema cron;create table cron.job(jobid bigserial primary key,jobname text unique,schedule text,command text);create function cron.schedule(text,text,text) returns bigint language sql as $$insert into cron.job(jobname,schedule,command) values($1,$2,$3) returning jobid$$;');await db.exec(await readFile(new URL('../../supabase/migrations/20261109000200_card_settlement_automation.sql',import.meta.url),'utf8'))}
   if(appointmentRemoval)await db.exec(await readFile(new URL('../../supabase/migrations/20261111000100_safe_appointment_removal.sql',import.meta.url),'utf8'))
+  await db.exec(await readFile(new URL('../../supabase/migrations/20261123000100_quick_patient_scheduling.sql',import.meta.url),'utf8'))
   await db.exec(`insert into users_profile(id,full_name) values('${testAdmin}','Administrador Exemplo');
     set role authenticated; select set_config('request.jwt.claim.sub','${testAdmin}',false);`)
   const user = { id: testAdmin, email: 'admin@example.test', aud: 'authenticated', role: 'authenticated', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-11-03T12:00:00Z', identities: [] }
@@ -39,6 +40,7 @@ export async function operationalApi(page: Page,financial=false,usability=false,
       if (url.pathname.startsWith('/rest/v1/rpc/')) {
         const name = url.pathname.split('/').pop()!, args = request.postDataJSON()
         const definitions: Record<string, [string, unknown[]]> = {
+          schedule_new_patient:['select public.schedule_new_patient($1::jsonb) as result',[JSON.stringify(args.p_data)]],
           manage_appointment_removal:['select public.manage_appointment_removal($1,$2,$3) as result',[args.p_id,args.p_version,args.p_confirm??false]],
           search_patients: ['select * from public.search_patients($1,$2,$3)', [args.p_query ?? '', args.p_offset ?? 0, args.p_active_only ?? false]],
           start_visit: ['select public.start_visit($1) as result', [args.p_appointment_id]],

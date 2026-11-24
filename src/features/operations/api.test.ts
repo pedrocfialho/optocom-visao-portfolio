@@ -1,7 +1,7 @@
 // Dados sintéticos de portfólio: nenhum paciente, fornecedor ou credencial real.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-const mocks = vi.hoisted(() => ({ from: vi.fn(), fetches: vi.fn(), selects: vi.fn(), save: vi.fn() }))
-vi.mock('../../lib/supabase', () => ({ supabase: { from: mocks.from } }))
+const mocks = vi.hoisted(() => ({ from: vi.fn(), rpc: vi.fn(), fetches: vi.fn(), selects: vi.fn(), save: vi.fn(), write: vi.fn(), eq: vi.fn() }))
+vi.mock('../../lib/supabase', () => ({ supabase: { from: mocks.from, rpc: mocks.rpc } }))
 import * as api from './api'
 import { clearDataSession } from '../../lib/dataCache'
 beforeEach(() => {
@@ -10,7 +10,10 @@ beforeEach(() => {
   mocks.from.mockImplementation((table: string) => {
     const builder = {
       select: (columns: string) => { mocks.selects(table, columns); return builder },
-      order: () => builder, eq: () => builder, update: () => builder,
+      order: () => builder,
+      eq: (column:string,value:unknown) => { mocks.eq(column,value);return builder },
+      insert: (input:unknown) => { mocks.write('insert',input);return builder },
+      update: (input:unknown) => { mocks.write('update',input);return builder },
       range: () => { mocks.fetches(table); return Promise.resolve({ data: [], error: null }) },
       maybeSingle: mocks.save,
     }
@@ -18,6 +21,29 @@ beforeEach(() => {
   })
 })
 describe('Catálogos operacionais e projeções', () => {
+  it('formulário normal cria paciente completo sem telefone ou outros campos opcionais',async()=>{
+    const input={full_name:'Ana Exemplo',phone:null,birth_date:null,cpf:null,admin_notes:'',active:true}
+    await api.savePatient(input,null)
+    expect(mocks.write).toHaveBeenCalledExactlyOnceWith('insert',{...input,registration_pending:false})
+  })
+  it('completar cadastro atualiza o mesmo ID e versão, sem INSERT e sem exigir telefone',async()=>{
+    const input={full_name:'Ana Exemplo',phone:null,birth_date:null,cpf:null,admin_notes:'',active:true}
+    await api.savePatient(input,{id:'patient-example',version:3})
+    expect(mocks.write).toHaveBeenCalledExactlyOnceWith('update',{...input,registration_pending:false})
+    expect(mocks.eq).toHaveBeenCalledWith('id','patient-example');expect(mocks.eq).toHaveBeenCalledWith('version',3)
+  })
+  it('cadastro rápido envia uma única RPC atômica, sem INSERT separado de paciente', async () => {
+    const input={full_name:'Ana Exemplo',professional_id:'pro',appointment_type_id:'type',start_at:'2030-01-01T17:00:00Z',status:'scheduled' as const,admin_notes:''}
+    mocks.rpc.mockResolvedValue({data:{id:'appointment-example',patient_id:'patient-example'},error:null})
+    expect(await api.scheduleNewPatient(input)).toMatchObject({id:'appointment-example'})
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith('schedule_new_patient',{p_data:input})
+    expect(mocks.from).not.toHaveBeenCalled()
+  })
+  it('migration ausente informa a dependência sem tentar criar dados por outro caminho', async () => {
+    mocks.rpc.mockResolvedValue({data:null,error:{code:'PGRST202'}})
+    await expect(api.scheduleNewPatient({full_name:'Ana Exemplo',professional_id:'pro',appointment_type_id:'type',start_at:'2030-01-01T17:00:00Z',status:'scheduled',admin_notes:''})).rejects.toThrow('Nenhum paciente ou agendamento foi criado')
+    expect(mocks.from).not.toHaveBeenCalled()
+  })
   it('Agenda não busca exames; páginas compartilham os outros catálogos', async () => {
     await Promise.all([api.agendaCatalogs(), api.agendaCatalogs()])
     expect(mocks.fetches.mock.calls.flat().sort()).toEqual(['appointment_types', 'professionals'])

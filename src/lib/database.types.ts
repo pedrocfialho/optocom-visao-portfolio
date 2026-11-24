@@ -2,14 +2,14 @@
 import type * as F from './finance.types'
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 export type RecordMeta = { id: string; version: number; created_at: string; updated_at: string; created_by: string | null; updated_by: string | null }
-export type Patient = RecordMeta & { full_name: string; phone: string; phone_digits: string; birth_date: string | null; cpf: string | null; admin_notes: string; active: boolean }
+export type Patient = RecordMeta & { full_name: string; phone: string | null; phone_digits: string | null; birth_date: string | null; cpf: string | null; admin_notes: string; active: boolean; registration_pending: boolean }
 export type Professional = RecordMeta & { full_name: string; active: boolean }
 export type PricedCatalog = RecordMeta & { name: string; default_price: number; active: boolean }
 export type AppointmentStatus = 'scheduled' | 'confirmed' | 'attended' | 'cancelled' | 'no_show'
 export type Appointment = RecordMeta & { patient_id: string; professional_id: string; appointment_type_id: string; start_at: string; status: AppointmentStatus; admin_notes: string; cancel_reason: string | null }
 export type Visit = RecordMeta & { request_id: string; patient_id: string; professional_id: string; appointment_type_id: string; appointment_id: string | null; visit_at: string; consultation_name_snapshot: string; base_price: number; consultation_discount: number; consultation_final: number; total_amount: number; status: 'draft' | 'completed' | 'cancelled'; admin_notes: string; cancel_reason: string | null; cancelled_at: string | null }
 export type VisitExam = RecordMeta & { visit_id: string; exam_id: string; exam_name_snapshot: string; unit_price_snapshot: number; active: boolean }
-export type AppointmentOverview = Appointment & { patient_name: string; professional_name: string; consultation_name: string; visit_id: string | null; visit_status: Visit['status'] | null }
+export type AppointmentOverview = Appointment & { patient_name: string; professional_name: string; consultation_name: string; visit_id: string | null; visit_status: Visit['status'] | null; patient_registration_pending: boolean }
 export type VisitOverview = Visit & { patient_name: string; professional_name: string }
 type Table<Row, Insert = Partial<Row>, Update = Partial<Insert>> = { Row: Row; Insert: Insert; Update: Update; Relationships: [] }
 export type Profile = {
@@ -38,7 +38,7 @@ export type Database = {
       finance_entries: Table<F.FinanceEntry>
       finance_movements: Table<F.Movement>
       daily_closings: Table<F.Closing>
-      patients: Table<Patient, { full_name: string; phone: string; birth_date?: string | null; cpf?: string | null; admin_notes?: string; active?: boolean }>
+      patients: Table<Patient, { full_name: string; phone?: string | null; birth_date?: string | null; cpf?: string | null; admin_notes?: string; active?: boolean; registration_pending?: boolean }>
       professionals: Table<Professional, { full_name: string; active?: boolean }>
       appointment_types: Table<PricedCatalog, { name: string; default_price: number; active?: boolean }>
       exams: Table<PricedCatalog, { name: string; default_price: number; active?: boolean }>
@@ -62,6 +62,7 @@ export type Database = {
       visit_overview: { Row: VisitOverview; Relationships: [] }
     }
     Functions: {
+      schedule_new_patient: { Args: { p_data: Json }; Returns: Json }
       manage_appointment_removal: {Args:{p_id:string;p_version:number;p_confirm?:boolean};Returns:Json}
       card_settlement_report: {Args:{p_from:string;p_to:string};Returns:Json}
       card_settlement_details: {Args:{p_entry_id:string};Returns:Json}

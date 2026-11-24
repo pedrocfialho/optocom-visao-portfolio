@@ -8,10 +8,10 @@ function run(entry,args,variables){
  if(result.error)throw result.error
  if(result.status!==0)process.exit(result.status??1)
 }
-const business=['agenda-actions','auth-invite','operational','financial','performance','usability','usability-round2'].map(n=>`e2e/${n}.spec.ts`)
+const business=['agenda-actions','auth-invite','operational','financial','performance','usability','usability-round2','quick-scheduling'].map(n=>`e2e/${n}.spec.ts`)
 const playwright='node_modules/@playwright/test/cli.js'
 run(playwright,['test',...business,'--workers=1','--output=test-results/business'],fake)
-run(playwright,['test','e2e/foundation.spec.ts','--workers=1','--output=test-results/foundation'],{})
+run(playwright,['test','e2e/foundation.spec.ts','--workers=1','--output=test-results/foundation'],{VITE_SUPABASE_URL:'',VITE_SUPABASE_PUBLISHABLE_KEY:''})
 run('node_modules/typescript/bin/tsc',['-b'],fake)
 run('node_modules/vite/bin/vite.js',['build'],fake)
 run(playwright,['test','--config','playwright.production.config.ts','--output=test-results/production'],fake)

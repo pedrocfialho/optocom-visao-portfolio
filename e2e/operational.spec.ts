@@ -17,7 +17,7 @@ test('paciente → agenda → atendimento com exames → conclusão e retorno gr
   }
   async function patient() {
     await page.getByRole('combobox', { name: 'Paciente', exact: true }).fill('Paciente de teste')
-    await page.getByRole('option', { name: /Paciente de teste/ }).click()
+    await page.getByRole('option', { name: /^Paciente de teste/ }).click()
   }
   try {
     await page.goto('/login')
@@ -33,7 +33,7 @@ test('paciente → agenda → atendimento com exames → conclusão e retorno gr
     await page.goto('/pacientes')
     await page.getByRole('button', { name: '+ Novo paciente' }).click()
     await page.getByLabel('Nome completo').fill('Paciente de teste')
-    await page.getByLabel('Telefone', { exact: true }).fill('(51) 99999-0001')
+    await page.getByLabel('Telefone (opcional)', { exact: true }).fill('(51) 99999-0001')
     await page.getByLabel('Data de nascimento (opcional)').fill('1990-05-15')
     await page.getByLabel('Observação administrativa (opcional)').fill('Cadastro fictício somente no banco local de testes.')
     await page.getByRole('button', { name: 'Salvar paciente' }).click()
@@ -89,7 +89,7 @@ test('paciente → agenda → atendimento com exames → conclusão e retorno gr
     await expect(page.getByRole('cell', { name: 'Retorno de teste', exact: true })).toBeVisible()
     await page.goto('/pacientes')
     await page.getByRole('button', { name: 'Paciente de teste', exact: true }).click()
-    await page.getByLabel('Telefone', { exact: true }).fill('(51) 99999-0001')
+    await page.getByLabel('Telefone (opcional)', { exact: true }).fill('(51) 99999-0001')
     await page.getByRole('checkbox', { name: 'Paciente ativo' }).uncheck()
     page.once('dialog',dialog=>{expect(dialog.message()).toContain('Paciente de teste');return dialog.accept()})
     await page.getByRole('button', { name: 'Salvar paciente' }).click()
